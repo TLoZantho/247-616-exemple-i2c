@@ -5,17 +5,17 @@
 #include <linux/i2c-dev.h> //for IOCTL defs
 #include <fcntl.h>
 
-#define I2C_BUS "/dev/i2c-0" // fichier Linux representant le BUS #0
-//#define I2C_BUS "/dev/i2c-1" // fichier Linux representant le BUS #1
+//#define I2C_BUS "/dev/i2c-0" // fichier Linux representant le BUS #0
+#define I2C_BUS "/dev/i2c-1" // fichier Linux representant le BUS #1
 
 /*******************************************************************************************/
 /*******************************************************************************************/
-#define CAPTEUR_I2C_ADDRESS 0xff	// adresse I2C du capteur de distance -- A REMPLACER
-#define CAPTEUR_REGID 0xffff	// adresse du registre ID du capteur de distance -- A REMPLACER
+#define CAPTEUR_I2C_ADDRESS 0x29	// adresse I2C du capteur de distance -- A REMPLACER
+#define CAPTEUR_REGID 0x0000	// adresse du registre ID du capteur de distance -- A REMPLACER
 /*******************************************************************************************/
 /*******************************************************************************************/
 
-int Lire_ID_Capteur(int)
+int Lire_ID_Capteur(int);
 
 int main()
 {
@@ -29,7 +29,7 @@ int main()
 	}
 	
 	/// Liaison de l'adresse I2C au fichier (file descriptor) du bus I2C et Initialisation
-	if(ioctl(fdPortI2C, I2C_SLAVE_FORCE, adresse_I2C) < 0)
+	if(ioctl(fdPortI2C, I2C_SLAVE_FORCE, CAPTEUR_I2C_ADDRESS) < 0)
 	{ 	// I2C_SLAVE_FORCE if it is already in use by a driver (i2cdetect : UU)
 		perror("erreur: adresse du device I2C ");
 		close(fdPortI2C);
