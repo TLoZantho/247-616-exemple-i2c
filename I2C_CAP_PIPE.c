@@ -13,6 +13,7 @@
 #define I2C_BUS "/dev/i2c-1"
 
 #define CAPTEUR_I2C_ADDRESS 0x29
+#define VL6180X_SYSTEM_FRESH_OUT_OF_RESET 0x0016
 #define VL6180X_SYSRANGE_START 0x0018
 #define VL6180X_RESULT_RANGE_VAL 0x0062
 #define VL6180X_RESULT_RANGE_STATUS 0x004D
@@ -52,6 +53,69 @@ void set_nonblocking(int fd) {
     fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 
+int configurer_capteur() 
+{
+    printf("Configuration du capteur VL6180X...\n");
+    
+    // Vérifier si le capteur sort du reset
+    uint8_t fresh_reset;
+    if (ReadByte(VL6180X_SYSTEM_FRESH_OUT_OF_RESET, &fresh_reset) != 0) {
+        printf("Erreur: Impossible de lire le statut du capteur\n");
+        return -1;
+    }
+    
+    if (fresh_reset != 0x01) {
+        printf("Avertissement: Le capteur n'est pas en état de reset initial\n");
+    }
+    
+    // Tuning Settings fournis
+WriteByte(0x0207, 0x01);
+WriteByte(0x0208, 0x01);
+WriteByte(0x0096, 0x00);
+WriteByte(0x0097, 0xfd);
+WriteByte(0x00e3, 0x00);
+WriteByte(0x00e4, 0x04);
+WriteByte(0x00e5, 0x02);
+WriteByte(0x00e6, 0x01);
+WriteByte(0x00e7, 0x03);
+WriteByte(0x00f5, 0x02);
+WriteByte(0x00d9, 0x05);
+WriteByte(0x00db, 0xce);
+WriteByte(0x00dc, 0x03);
+WriteByte(0x00dd, 0xf8);
+WriteByte(0x009f, 0x00);
+WriteByte(0x00a3, 0x3c);
+WriteByte(0x00b7, 0x00);
+WriteByte(0x00bb, 0x3c);
+WriteByte(0x00b2, 0x09);
+WriteByte(0x00ca, 0x09);
+WriteByte(0x0198, 0x01);
+WriteByte(0x01b0, 0x17);
+WriteByte(0x01ad, 0x00);
+WriteByte(0x00ff, 0x05);
+WriteByte(0x0100, 0x05);
+WriteByte(0x0199, 0x05);
+WriteByte(0x01a6, 0x1b);
+WriteByte(0x01ac, 0x3e);
+WriteByte(0x01a7, 0x1f);
+WriteByte(0x0030, 0x00);
+WriteByte(0x0011, 0x10); // Enables polling for "New Sample ready" when measurement completes
+WriteByte(0x010a, 0x30); // Set averaging sample period
+WriteByte(0x003f, 0x46); // Sets light and dark gain
+WriteByte(0x0031, 0xFF); // Auto calibration count
+WriteByte(0x0040, 0x63); // ALS integration time 100ms
+WriteByte(0x002e, 0x01); // Temperature calibration
+WriteByte(0x001b, 0x09); // Default ranging inter-measurement period 100ms
+WriteByte(0x003e, 0x31); // Default ALS inter-measurement period 500ms
+WriteByte(0x0014, 0x24); // Interrupt on new sample ready
+WriteByte(0x0016, 0x00); // Clear fresh-out-of-set status
+    
+    // Réinitialiser le flag "fresh out of reset"
+    WriteByte(VL6180X_SYSTEM_FRESH_OUT_OF_RESET, 0x00);
+    
+    printf("Configuration terminée!\n");
+    return 0;
+}
 int main() {
     // Création des pipes :
     int pipe_pere_fils[2];   // Père -> Fils : demande de démarrer/arrêter affichage
@@ -65,7 +129,10 @@ int main() {
     set_nonblocking(pipe_pere_fils[0]);
     set_nonblocking(pipe_fils_petit[0]);
     set_nonblocking(pipe_mesure[0]);
-
+    if (configurer_capteur() != 0) {
+        close(i2c_file);
+        return 1;
+    }
     pid_t pid_fils = fork();
 
     if (pid_fils == 0) {

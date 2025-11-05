@@ -69,28 +69,46 @@ int configurer_capteur() {
     }
     
     // Tuning Settings fournis
-    WriteByte(0x0207, 0x01);
-    WriteByte(0x0208, 0x01);
-    WriteByte(0x0133, 0x01);
-    WriteByte(0x0096, 0x00);
-    WriteByte(0x0097, 0xFD);
-    WriteByte(0x00e3, 0x00);
-    WriteByte(0x00e4, 0x04);
-    WriteByte(0x00e5, 0x02);
-    WriteByte(0x00e6, 0x01);
-    WriteByte(0x00e7, 0x03);
-    WriteByte(0x00f5, 0x02);
-    WriteByte(0x00D9, 0x05);
-    WriteByte(0x00DB, 0xCE);
-    WriteByte(0x00DC, 0x03);
-    WriteByte(0x00DD, 0xF8);
-    WriteByte(0x009f, 0x00);
-    WriteByte(0x00a3, 0x3c);
-    WriteByte(0x00b7, 0x00);
-    WriteByte(0x00bb, 0x3c);
-    WriteByte(0x00b2, 0x09);
-    WriteByte(0x00ca, 0x09);
-    WriteByte(0x0198, 0x01);
+WriteByte(0x0207, 0x01);
+WriteByte(0x0208, 0x01);
+WriteByte(0x0096, 0x00);
+WriteByte(0x0097, 0xfd);
+WriteByte(0x00e3, 0x00);
+WriteByte(0x00e4, 0x04);
+WriteByte(0x00e5, 0x02);
+WriteByte(0x00e6, 0x01);
+WriteByte(0x00e7, 0x03);
+WriteByte(0x00f5, 0x02);
+WriteByte(0x00d9, 0x05);
+WriteByte(0x00db, 0xce);
+WriteByte(0x00dc, 0x03);
+WriteByte(0x00dd, 0xf8);
+WriteByte(0x009f, 0x00);
+WriteByte(0x00a3, 0x3c);
+WriteByte(0x00b7, 0x00);
+WriteByte(0x00bb, 0x3c);
+WriteByte(0x00b2, 0x09);
+WriteByte(0x00ca, 0x09);
+WriteByte(0x0198, 0x01);
+WriteByte(0x01b0, 0x17);
+WriteByte(0x01ad, 0x00);
+WriteByte(0x00ff, 0x05);
+WriteByte(0x0100, 0x05);
+WriteByte(0x0199, 0x05);
+WriteByte(0x01a6, 0x1b);
+WriteByte(0x01ac, 0x3e);
+WriteByte(0x01a7, 0x1f);
+WriteByte(0x0030, 0x00);
+WriteByte(0x0011, 0x10); // Enables polling for "New Sample ready" when measurement completes
+WriteByte(0x010a, 0x30); // Set averaging sample period
+WriteByte(0x003f, 0x46); // Sets light and dark gain
+WriteByte(0x0031, 0xFF); // Auto calibration count
+WriteByte(0x0040, 0x63); // ALS integration time 100ms
+WriteByte(0x002e, 0x01); // Temperature calibration
+WriteByte(0x001b, 0x09); // Default ranging inter-measurement period 100ms
+WriteByte(0x003e, 0x31); // Default ALS inter-measurement period 500ms
+WriteByte(0x0014, 0x24); // Interrupt on new sample ready
+WriteByte(0x0016, 0x00); // Clear fresh-out-of-set status
     
     // Réinitialiser le flag "fresh out of reset"
     WriteByte(VL6180X_SYSTEM_FRESH_OUT_OF_RESET, 0x00);
@@ -123,11 +141,11 @@ int lire_distance(uint8_t *distance_mm) {
     if (ReadByte(VL6180X_RESULT_RANGE_VAL, distance_mm) != 0) {
         return -1;
     }
-    
     return 0;
 }
 
-int main() {
+int main() 
+{
     uint8_t id_capteur;
     
     // Ouvrir le bus I2C
